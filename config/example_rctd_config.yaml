@@ -1,0 +1,42 @@
+# RCTD cell-type deconvolution. Required: samples, outdir, reference.path, reference.format (+ celltype_col for Seurat references).
+samples: example_rctd/samples.tsv     # same sample sheet as the niche pipeline
+outdir: example_rctd/results
+
+reference:
+  path: example_rctd/data/reference.rds
+  format: rds_list        # seurat_rds | seurat_qs | rds_list
+                          #   rds_list = list(counts = <genes x cells raw counts>, cell_types = <named vector, or data.frame(cell, type)>)
+  assay: null             # Seurat reference: assay with raw counts (null = default)
+  celltype_col: null      # Seurat reference: metadata column with the cell-type label
+  min_cells_per_type: 25  # cell types with fewer cells are dropped (RCTD needs enough cells to learn a profile)
+  max_cells_per_type: 10000
+
+input:                    # as in the niche pipeline (Seurat spatial inputs only)
+  assay: null
+  x_col: null
+  y_col: null
+
+qc:
+  min_features: 200
+  max_pct_mt: 20
+  min_spots: 50
+
+rctd:
+  mode: full              # full   = any number of cell types per spot (55 um Visium)
+                          # multi  = up to 4 types per spot; doublet = 1-2 types (finer resolution platforms)
+  cores: 4
+  umi_min: 100            # spots below this depth are not deconvolved
+  # the remaining keys are spacexr defaults; change only with a reason
+  gene_cutoff: 0.000125
+  fc_cutoff: 0.5
+  gene_cutoff_reg: 0.0002
+  fc_cutoff_reg: 0.75
+  counts_min: 10
+  umi_min_sigma: 300
+  confidence_threshold: 5
+  doublet_threshold: 20
+
+groups: null              # optional broader classes, e.g.
+# groups:
+#   T_NK: [CD4T, CD8T, Treg, NK]
+#   Myeloid: [Macrophage, DC, Mast]

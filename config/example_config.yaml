@@ -1,0 +1,59 @@
+# Example configuration. Every key is optional except `samples` and `outdir`; the values shown are the defaults
+# (except where noted). Paths are relative to the directory you run the pipeline from.
+samples: example/samples.tsv        # sample sheet (TSV): sample_id, path, format [, coords, any metadata columns]
+outdir: example/results
+
+input:
+  assay: null        # Seurat inputs: assay holding raw counts (null = default assay)
+  x_col: null        # Seurat inputs: metadata columns with spot coordinates;
+  y_col: null        #   null = use GetTissueCoordinates()
+
+qc:
+  min_features: 200  # keep spots with more detected genes than this
+  max_pct_mt: 20     # and less mitochondrial signal than this (%)
+  mt_pattern: "^MT-|^mt-"
+  min_spots: 50      # a sample with fewer passing spots is left out
+
+depth:
+  equalise: false    # true = binomial thinning of every sample to the median depth of the shallowest one.
+                     # Turn on when depth differs several-fold between samples (e.g. mixed chemistries).
+  min_umi_after: 100
+
+hvg:
+  n: 2000
+
+banksy:
+  lambda: 0.2        # 0.2 = cell-typing mode, 0.8 = domain mode
+  k_geom: 6          # neighbours: 6 = first ring of a Visium hexagonal grid; 8 for a square grid
+  use_agf: true      # include the azimuthal Gabor filter (neighbourhood gradient)
+
+subsample:
+  n_per_sample: 500  # spots drawn per sample so that large samples do not dominate
+  seed: 1
+  stability_seed: 2  # second draw used only to report clustering stability; null to skip
+
+pca:
+  npcs: 30
+
+harmony:
+  vars: sample_id    # column(s) of the sample sheet to integrate over; "none" to skip Harmony
+
+cluster:
+  dims: 20
+  resolutions: [0.3, 0.6, 1.0]
+  main_resolution: 0.6   # the one used for tables, markers and figures
+
+assign:
+  all_spots: true              # carry the cluster labels from the drawn spots to every spot (nearest centroid)
+  min_spots_per_cluster: 100   # clusters smaller than this are not carried over
+
+annotation:
+  weights_pattern: null        # optional: per-sample RCTD weights from run_rctd.R, e.g. "rctd_results/{sample_id}_weights.tsv.gz";
+                               # adds cluster_celltype_weights.tsv (mean cell-type weight per niche)
+
+report:
+  marker_min_auc: 0.65
+  n_markers: 10
+  min_spots_per_sample: 10
+  colour_by: sample_id         # sample-sheet column(s) for extra UMAP panels
+  max_spatial_plots: 50

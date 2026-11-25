@@ -1,0 +1,12 @@
+example/
+results/
+logs/*
+!logs/.gitkeep
+*.rds
+*.qs
+*.h5
+*.h5ad
+.Rhistory
+.RData
+.Rproj.user/
+example_rctd/
